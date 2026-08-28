@@ -4,7 +4,7 @@ import de.danoeh.antennapod.model.playback.TimerValue;
 
 public interface SleepTimer {
 
-    long NOTIFICATION_THRESHOLD = 10000;
+    long NOTIFICATION_THRESHOLD = 60000;
 
     /**
      * @return Returns time left for this sleep timer, both display value and in milis

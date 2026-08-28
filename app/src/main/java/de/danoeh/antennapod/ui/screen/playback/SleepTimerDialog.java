@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -211,12 +212,38 @@ public class SleepTimerDialog extends BottomSheetDialogFragment {
         viewBinding.autoEnableCheckbox.setChecked(SleepTimerPreferences.autoEnable());
         viewBinding.shakeToResetCheckbox.setChecked(SleepTimerPreferences.shakeToReset());
         viewBinding.vibrateCheckbox.setChecked(SleepTimerPreferences.vibrate());
+        viewBinding.resetTimerOnPauseCheckbox.setChecked(SleepTimerPreferences.resetOnPause());
         refreshAutoEnableControls(SleepTimerPreferences.autoEnable());
 
-        viewBinding.shakeToResetCheckbox.setOnCheckedChangeListener((buttonView, isChecked)
-                -> SleepTimerPreferences.setShakeToReset(isChecked));
+        viewBinding.shakeToResetCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SleepTimerPreferences.setShakeToReset(isChecked);
+            viewBinding.shakeThresholdContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        });
+        viewBinding.shakeThresholdContainer.setVisibility(
+                SleepTimerPreferences.shakeToReset() ? View.VISIBLE : View.GONE);
+        viewBinding.shakeThresholdSeekBar.setProgress((int) ((SleepTimerPreferences.getShakeThreshold() - 1.5f) * 100));
+        updateShakeThresholdText(SleepTimerPreferences.getShakeThreshold());
+        viewBinding.shakeThresholdSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float threshold = 1.5f + (progress / 100.0f);
+                updateShakeThresholdText(threshold);
+                SleepTimerPreferences.setShakeThreshold(threshold);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
         viewBinding.vibrateCheckbox.setOnCheckedChangeListener((buttonView, isChecked)
                 -> SleepTimerPreferences.setVibrate(isChecked));
+        viewBinding.resetTimerOnPauseCheckbox.setOnCheckedChangeListener((buttonView, isChecked)
+                -> SleepTimerPreferences.setResetOnPause(isChecked));
         viewBinding.autoEnableCheckbox.setOnCheckedChangeListener((compoundButton, isChecked)
                 -> {
             boolean mostOfDay = isSleepTimerConfiguredForMostOfTheDay();
@@ -269,6 +296,11 @@ public class SleepTimerDialog extends BottomSheetDialogFragment {
             }
         });
         return viewBinding.getRoot();
+    }
+
+    private void updateShakeThresholdText(float threshold) {
+        viewBinding.shakeThresholdValue.setText(getString(R.string.shake_threshold_label)
+                + ": " + String.format(Locale.getDefault(), "%.2fg", threshold));
     }
 
     private boolean isSleepTimerConfiguredForMostOfTheDay() {

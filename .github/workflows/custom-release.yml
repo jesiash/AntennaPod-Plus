@@ -1,0 +1,74 @@
+name: Build Custom Release
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+
+      - name: Add Upstream
+        run: |
+          git remote add upstream https://github.com/AntennaPod/AntennaPod.git
+          git fetch upstream --tags
+
+      - name: Check for new release
+        id: check_new
+        run: |
+          UPSTREAM_TAG=$(git describe --tags --abbrev=0 upstream/master)
+          echo "Latest upstream tag: $UPSTREAM_TAG"
+          
+          # Check if this tag has already been built (tag starts with 'custom-')
+          # If triggered manually (workflow_dispatch), we always build.
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] && git rev-parse "custom-$UPSTREAM_TAG" >/dev/null 2>&1; then
+            echo "Version $UPSTREAM_TAG already built. Skipping."
+            echo "new_release=false" >> $GITHUB_OUTPUT
+          else
+            echo "Building version: $UPSTREAM_TAG"
+            echo "new_release=true" >> $GITHUB_OUTPUT
+            echo "tag=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Merge Upstream
+        if: steps.check_new.outputs.new_release == 'true'
+        run: |
+          # Merge the specific tag to stay aligned with the release
+          git merge "upstream/master" --no-edit || (echo "Merge conflict! Manual intervention required." && exit 1)
+
+      - name: Set up JDK 21
+        if: steps.check_new.outputs.new_release == 'true'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Build Custom APK
+        if: steps.check_new.outputs.new_release == 'true'
+        run: |
+          # Build optimized release version
+          ./gradlew :app:assembleFreeRelease -Pandroid.builder.sdkDownload=false
+
+      - name: Create Release
+        if: steps.check_new.outputs.new_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: custom-${{ steps.check_new.outputs.tag }}
+          name: Custom Build ${{ steps.check_new.outputs.tag }}
+          files: |
+            app/build/outputs/apk/free/release/app-free-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
