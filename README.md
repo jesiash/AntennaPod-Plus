@@ -1,3 +1,5 @@
+vibcoded fork for personal use, adding 60 sleeptimer, configurable shake sensitivity, and automatic reset on pause
+
 # AntennaPod
 
 [![GitHub check runs](https://img.shields.io/github/check-runs/AntennaPod/AntennaPod/develop)](https://github.com/AntennaPod/AntennaPod/actions/workflows/checks.yml?query=branch%3Adevelop)
