@@ -876,6 +876,9 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                         stateManager.stopForeground(!UserPreferences.isPersistNotify());
                     }
                     cancelPositionObserver();
+                    if (SleepTimerPreferences.resetOnPause() && sleepTimerActive()) {
+                        sleepTimer.reset();
+                    }
                     break;
                 case STOPPED:
                     //writePlaybackPreferencesNoMediaPlaying();
@@ -1054,8 +1057,9 @@ public class PlaybackService extends MediaBrowserServiceCompat {
             newPosition = Math.max(newPosition, 0);
             seekTo(newPosition);
         } else if (event.getMillisTimeLeft() < SleepTimer.NOTIFICATION_THRESHOLD) {
-            final float[] multiplicators = {0.1f, 0.2f, 0.3f, 0.3f, 0.3f, 0.4f, 0.4f, 0.4f, 0.6f, 0.8f};
-            float multiplicator = multiplicators[Math.max(0, (int) event.getMillisTimeLeft() / 1000)];
+            float progress = (float) event.getMillisTimeLeft() / SleepTimer.NOTIFICATION_THRESHOLD;
+            float multiplicator = (float) Math.pow(progress, 2);
+            multiplicator = Math.max(0.1f, multiplicator);
             Log.d(TAG, "onSleepTimerAlmostExpired: " + multiplicator);
             mediaPlayer.setVolume(multiplicator, multiplicator);
         } else if (event.isCancelled()) {

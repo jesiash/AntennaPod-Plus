@@ -22,10 +22,13 @@ public class SleepTimerPreferences {
     private static final String PREF_AUTO_ENABLE = "AutoEnable";
     private static final String PREF_AUTO_ENABLE_FROM = "AutoEnableFrom";
     private static final String PREF_AUTO_ENABLE_TO = "AutoEnableTo";
+    private static final String PREF_SHAKE_THRESHOLD = "ShakeThreshold";
+    private static final String PREF_RESET_ON_PAUSE = "ResetOnPause";
 
     private static final int DEFAULT_TIMER_TYPE = 0;
     private static final int DEFAULT_AUTO_ENABLE_FROM = 22;
     private static final int DEFAULT_AUTO_ENABLE_TO = 6;
+    private static final float DEFAULT_SHAKE_THRESHOLD = 2.25f;
 
     private static SharedPreferences prefs;
 
@@ -105,6 +108,22 @@ public class SleepTimerPreferences {
 
     public static int autoEnableTo() {
         return prefs.getInt(PREF_AUTO_ENABLE_TO, DEFAULT_AUTO_ENABLE_TO);
+    }
+
+    public static void setShakeThreshold(float threshold) {
+        prefs.edit().putFloat(PREF_SHAKE_THRESHOLD, threshold).apply();
+    }
+
+    public static float getShakeThreshold() {
+        return prefs.getFloat(PREF_SHAKE_THRESHOLD, DEFAULT_SHAKE_THRESHOLD);
+    }
+
+    public static void setResetOnPause(boolean resetOnPause) {
+        prefs.edit().putBoolean(PREF_RESET_ON_PAUSE, resetOnPause).apply();
+    }
+
+    public static boolean resetOnPause() {
+        return prefs.getBoolean(PREF_RESET_ON_PAUSE, false);
     }
 
     public static int autoEnableDuration() {

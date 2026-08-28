@@ -11,6 +11,8 @@ import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.util.Log;
 
+import de.danoeh.antennapod.storage.preferences.SleepTimerPreferences;
+
 public class ShakeListener implements SensorEventListener {
     private static final String TAG = ShakeListener.class.getSimpleName();
 
@@ -73,7 +75,7 @@ public class ShakeListener implements SensorEventListener {
         float gZ = event.values[2] / SensorManager.GRAVITY_EARTH;
 
         double gForce = Math.sqrt(gX * gX + gY * gY + gZ * gZ);
-        if (gForce > 2.25) {
+        if (gForce > SleepTimerPreferences.getShakeThreshold()) {
             Log.d(TAG, "Detected shake " + gForce);
             mSleepTimer.reset();
             vibrate();

@@ -314,6 +314,9 @@ public class Media3PlaybackService extends MediaLibraryService {
                 if (currentPlayable != null) {
                     SynchronizationQueue.getInstance().enqueueEpisodePlayed(currentPlayable, false);
                 }
+                if (SleepTimerPreferences.resetOnPause() && sleepTimer != null && sleepTimer.isActive()) {
+                    sleepTimer.reset();
+                }
             }
             WidgetUpdater.WidgetState widgetState = new WidgetUpdater.WidgetState(currentPlayable,
                     PlaybackService.isRunning ? PlayerStatus.PLAYING : PlayerStatus.PAUSED,
@@ -782,7 +785,8 @@ public class Media3PlaybackService extends MediaLibraryService {
         } else if (!event.wasJustEnabled()) {
             long millisLeft = event.getMillisTimeLeft();
             if (millisLeft < SleepTimer.NOTIFICATION_THRESHOLD && millisLeft > 0) {
-                float volume = (float) millisLeft / SleepTimer.NOTIFICATION_THRESHOLD;
+                float progress = (float) millisLeft / SleepTimer.NOTIFICATION_THRESHOLD;
+                float volume = (float) Math.pow(progress, 2);
                 applyVolumeAdaption(Math.max(0.1f, volume));
             } else {
                 applyVolumeAdaption(1.0f);
