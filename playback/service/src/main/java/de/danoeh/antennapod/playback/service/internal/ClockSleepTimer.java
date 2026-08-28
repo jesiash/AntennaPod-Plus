@@ -80,10 +80,6 @@ public class ClockSleepTimer implements SleepTimer {
             vibrate();
             hasVibrated = true;
         }
-        // start listening for shakes if shake to reset is enabled
-        if (shakeListener == null && SleepTimerPreferences.shakeToReset()) {
-            shakeListener = new ShakeListener(getContext(), this);
-        }
     }
 
     @Override
@@ -106,6 +102,10 @@ public class ClockSleepTimer implements SleepTimer {
         EventBus.getDefault().post(SleepTimerUpdatedEvent.justEnabled(left));
 
         EventBus.getDefault().postSticky(SleepTimerUpdatedEvent.updated(left));
+
+        if (shakeListener == null && SleepTimerPreferences.shakeToReset()) {
+            shakeListener = new ShakeListener(getContext(), this);
+        }
     }
 
     @Override
