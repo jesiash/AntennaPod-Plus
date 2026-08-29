@@ -64,6 +64,17 @@ jobs:
           # Build optimized release version
           ./gradlew :app:assembleFreeRelease -Pandroid.builder.sdkDownload=false
 
+      - name: Sign APK
+        if: steps.check_new.outputs.new_release == 'true'
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/free/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
       - name: Create Release
         if: steps.check_new.outputs.new_release == 'true'
         uses: softprops/action-gh-release@v2
@@ -71,6 +82,6 @@ jobs:
           tag_name: custom-${{ steps.check_new.outputs.tag }}
           name: Custom Build ${{ steps.check_new.outputs.tag }}
           files: |
-            app/build/outputs/apk/free/release/app-free-release.apk
+            ${{ steps.sign_app.outputs.signedReleaseFile }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
