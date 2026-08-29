@@ -58,23 +58,19 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Build Custom APK
+      - name: Build and Sign Custom APK
         if: steps.check_new.outputs.new_release == 'true'
         run: |
-          # Build optimized release version
-          ./gradlew :app:assembleFreeRelease -Pandroid.builder.sdkDownload=false
-
-      - name: Sign APK
-        if: steps.check_new.outputs.new_release == 'true'
-        uses: r0adkll/sign-android-release@v1
-        id: sign_app
-        with:
-          releaseDirectory: app/build/outputs/apk/free/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: "35.0.0"
+          # Decode the keystore from secrets
+          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > app/release.jks
+          
+          # Build optimized release version using the provided keystore
+          ./gradlew :app:assembleFreeRelease \
+            -PreleaseStoreFile=release.jks \
+            -PreleaseStorePassword="${{ secrets.KEY_STORE_PASSWORD }}" \
+            -PreleaseKeyAlias="${{ secrets.ALIAS }}" \
+            -PreleaseKeyPassword="${{ secrets.KEY_PASSWORD }}" \
+            -Pandroid.builder.sdkDownload=false
 
       - name: Create Release
         if: steps.check_new.outputs.new_release == 'true'
@@ -82,7 +78,6 @@ jobs:
         with:
           tag_name: custom-${{ steps.check_new.outputs.tag }}
           name: Custom Build ${{ steps.check_new.outputs.tag }}
-          files: |
-            ${{ steps.sign_app.outputs.signedReleaseFile }}
+          files: app/build/outputs/apk/free/release/app-free-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

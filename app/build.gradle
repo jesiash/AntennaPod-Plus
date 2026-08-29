@@ -34,11 +34,10 @@ android {
         }
         release {
             applicationIdSuffix ".custom"
-            applicationIdSuffix ".custom"
             resValue "string", "provider_authority", "de.danoeh.antennapod.custom.provider"
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.releaseConfig
         }
     }
 
