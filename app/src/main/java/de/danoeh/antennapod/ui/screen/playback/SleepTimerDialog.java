@@ -221,12 +221,12 @@ public class SleepTimerDialog extends BottomSheetDialogFragment {
         });
         viewBinding.shakeThresholdContainer.setVisibility(
                 SleepTimerPreferences.shakeToReset() ? View.VISIBLE : View.GONE);
-        viewBinding.shakeThresholdSeekBar.setProgress((int) ((SleepTimerPreferences.getShakeThreshold() - 1.5f) * 100));
+        viewBinding.shakeThresholdSeekBar.setProgress((int) ((SleepTimerPreferences.getShakeThreshold() - 1.05f) * 100));
         updateShakeThresholdText(SleepTimerPreferences.getShakeThreshold());
         viewBinding.shakeThresholdSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float threshold = 1.5f + (progress / 100.0f);
+                float threshold = 1.05f + (progress / 100.0f);
                 updateShakeThresholdText(threshold);
                 SleepTimerPreferences.setShakeThreshold(threshold);
             }
