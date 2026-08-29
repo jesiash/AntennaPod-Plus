@@ -1,4 +1,4 @@
-vibcoded fork for personal use, adding 60 sleeptimer, configurable shake sensitivity, and automatic reset on pause
+vibcoded fork for personal use, adding 60s sleeptimer, configurable shake sensitivity, and automatic reset on pause
 
 # AntennaPod
 
