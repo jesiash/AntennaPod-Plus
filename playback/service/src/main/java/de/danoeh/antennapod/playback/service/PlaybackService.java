@@ -876,8 +876,11 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                         stateManager.stopForeground(!UserPreferences.isPersistNotify());
                     }
                     cancelPositionObserver();
-                    if (SleepTimerPreferences.resetOnPause() && sleepTimerActive()) {
-                        sleepTimer.reset();
+                    if (sleepTimerActive()) {
+                        if (SleepTimerPreferences.resetOnPause()) {
+                            sleepTimer.reset();
+                        }
+                        sleepTimer.onPause();
                     }
                     break;
                 case STOPPED:
@@ -914,6 +917,9 @@ public class PlaybackService extends MediaBrowserServiceCompat {
                                 (ctx) -> disableSleepTimer(), getString(R.string.undo)));
                     }
                     loadQueueForMediaSession();
+                    if (sleepTimerActive()) {
+                        sleepTimer.onResume();
+                    }
                     positionJustResetAfterPlayback = null;
                     break;
                 case ERROR:

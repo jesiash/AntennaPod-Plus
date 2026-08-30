@@ -52,4 +52,8 @@ public interface SleepTimer {
     boolean shouldContinueToNextEpisode();
 
     void episodeFinishedPlayback();
+
+    void onPause();
+
+    void onResume();
 }

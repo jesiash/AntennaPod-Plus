@@ -308,14 +308,20 @@ public class Media3PlaybackService extends MediaLibraryService {
             if (PlaybackService.isRunning) {
                 lastPositionSaveTime = System.currentTimeMillis();
                 setupPositionObserver();
+                if (sleepTimer != null && sleepTimer.isActive()) {
+                    sleepTimer.onResume();
+                }
             } else {
                 cancelPositionObserver();
                 saveCurrentPosition();
                 if (currentPlayable != null) {
                     SynchronizationQueue.getInstance().enqueueEpisodePlayed(currentPlayable, false);
                 }
-                if (SleepTimerPreferences.resetOnPause() && sleepTimer != null && sleepTimer.isActive()) {
-                    sleepTimer.reset();
+                if (sleepTimer != null && sleepTimer.isActive()) {
+                    if (SleepTimerPreferences.resetOnPause()) {
+                        sleepTimer.reset();
+                    }
+                    sleepTimer.onPause();
                 }
             }
             WidgetUpdater.WidgetState widgetState = new WidgetUpdater.WidgetState(currentPlayable,

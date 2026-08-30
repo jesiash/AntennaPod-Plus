@@ -155,4 +155,22 @@ public class ClockSleepTimer implements SleepTimer {
     public void episodeFinishedPlayback() {
         //no-op
     }
+
+    @Override
+    public void onPause() {
+        if (shakeListener != null) {
+            shakeListener.pause();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        if (SleepTimerPreferences.shakeToReset()) {
+            if (shakeListener == null) {
+                shakeListener = new ShakeListener(getContext(), this);
+            } else {
+                shakeListener.resume();
+            }
+        }
+    }
 }
