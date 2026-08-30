@@ -12,6 +12,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import de.danoeh.antennapod.event.playback.PlaybackPositionEvent;
+import de.danoeh.antennapod.event.playback.SleepTimerPreferencesChangedEvent;
 import de.danoeh.antennapod.event.playback.SleepTimerUpdatedEvent;
 import de.danoeh.antennapod.model.playback.TimerValue;
 import de.danoeh.antennapod.storage.preferences.SleepTimerPreferences;
@@ -51,6 +52,17 @@ public class ClockSleepTimer implements SleepTimer {
         if (timeLeft <= 0) {
             Log.d(TAG, "Clock Sleep timer expired");
             stop();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressWarnings("unused")
+    public void sleepTimerPreferencesChanged(SleepTimerPreferencesChangedEvent event) {
+        Log.d(TAG, "Sleep timer preferences changed");
+        if (SleepTimerPreferences.shakeToReset()) {
+            onResume();
+        } else {
+            onPause();
         }
     }
 

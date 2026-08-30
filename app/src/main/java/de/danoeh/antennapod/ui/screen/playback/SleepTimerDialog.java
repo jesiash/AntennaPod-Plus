@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import de.danoeh.antennapod.BuildConfig;
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.databinding.TimeDialogBinding;
+import de.danoeh.antennapod.event.playback.SleepTimerPreferencesChangedEvent;
 import de.danoeh.antennapod.event.playback.SleepTimerUpdatedEvent;
 import de.danoeh.antennapod.playback.service.PlaybackController;
 import de.danoeh.antennapod.playback.service.PlaybackService;
@@ -218,6 +219,7 @@ public class SleepTimerDialog extends BottomSheetDialogFragment {
         viewBinding.shakeToResetCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SleepTimerPreferences.setShakeToReset(isChecked);
             viewBinding.shakeThresholdContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            EventBus.getDefault().post(new SleepTimerPreferencesChangedEvent());
         });
         viewBinding.shakeThresholdContainer.setVisibility(
                 SleepTimerPreferences.shakeToReset() ? View.VISIBLE : View.GONE);
@@ -229,6 +231,9 @@ public class SleepTimerDialog extends BottomSheetDialogFragment {
                 float threshold = 1.05f + (progress / 100.0f);
                 updateShakeThresholdText(threshold);
                 SleepTimerPreferences.setShakeThreshold(threshold);
+                if (fromUser) {
+                    EventBus.getDefault().post(new SleepTimerPreferencesChangedEvent());
+                }
             }
 
             @Override
